@@ -1,6 +1,10 @@
 <?php
 
-use App\Http\Controllers\KonyvtaController;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\CopyController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\LendingController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,14 +18,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/api/books', [KonyvtaController::class, 'index']);
-Route::get('/api/books/{id}', [KonyvtaController::class, 'show']);
-Route::post('/api/books', [KonyvtaController::class, 'store']);
-Route::put('/api/books/{id}', [KonyvtaController::class, 'update']);
-Route::delete('/api/books/{id}', [KonyvtaController::class, 'destroy']);
+Route::get('/', function () {
+    return view('welcome');
+});
 
-/* View utvonal */
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/book/list', [KonyvtaController::class, 'listView']);
-Route::get('/book/edit', [KonyvtaController::class, 'editView']);
-Route::get('/book/view', [KonyvtaController::class, 'newView']);
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::apiResource('/api/book', BookController::class);
+Route::apiResource('/api/copy', CopyController::class);
+Route::apiResource('/api/users', UserController::class);
+Route::apiResource('/api/lendings', [LendingController::class, 'index']);
+Route::apiResource('/api/lendings/{$user_id}/{$copy_id}/{$start}', [LendingController::class, 'show']);
+
+require __DIR__.'/auth.php';
